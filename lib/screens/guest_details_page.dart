@@ -33,9 +33,9 @@ class GuestDetailsPage extends StatelessWidget {
 
           child: Column(
             children: [
-              // =========================
+              
               // MAIN BILL CARD
-              // =========================
+             
               Card(
                 elevation: 5,
 
