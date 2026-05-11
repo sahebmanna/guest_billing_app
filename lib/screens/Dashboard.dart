@@ -18,9 +18,7 @@ class DashboardPage extends StatelessWidget {
         title: const Text("Dashboard"),
       ),
 
-      // =========================
       // RIGHT DRAWER
-      // =========================
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -107,9 +105,6 @@ class DashboardPage extends StatelessWidget {
         ),
       ),
 
-      // =========================
-      // BODY
-      // =========================
       body: Obx(
         () => SingleChildScrollView(
           padding: const EdgeInsets.all(20),

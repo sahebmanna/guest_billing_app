@@ -1,31 +1,33 @@
-// import 'dart:convert';
+/* import 'dart:convert';
 
-// import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
 
-// import '../model/guest_model.dart';
+import '../model/guest_model.dart';
 
-// class GuestService {
-//   static Future<List<GuestModel>> fetchGuests() async {
-//     final response = await http.get(
-//       Uri.parse(
-//         "https://api.atithiaadhaar.com/api/BillingService/GetGuestBillingByReservationId/INDG77591498",
-//       ),
-//     );
+class GuestService {
+  static Future<List<GuestModel>> fetchGuests() async {
+    final response = await http.get(
+      Uri.parse(
+        "https://api.atithiaadhaar.com/api/BillingService/GetGuestBillingByReservationId/INDG77591498",
+      ),
+    );
 
-//     print("STATUS CODE: ${response.statusCode}");
-//     print("BODY: ${response.body}");
-//     if (response.statusCode == 200) {
-//       final data = jsonDecode(response.body);
-//       print("DECODED DATA: $data");
-//       List guestList =
-//           data['GuestBillingByReservationIdResponse']['BillingGuestList'];
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print("DECODED DATA: $data");
+      List guestList =
+          data['GuestBillingByReservationIdResponse']['BillingGuestList'];
 
-//       return guestList.map((e) => GuestModel.fromJson(e)).toList();
-//     } else {
-//       throw Exception("Failed to load guests");
-//     }
-//   }
-// }
+      return guestList.map((e) => GuestModel.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to load guests");
+    }
+  }
+}
+
+*/
 
 import 'dart:convert';
 
@@ -34,7 +36,7 @@ import 'package:http/http.dart' as http;
 import '../model/guest_model.dart';
 
 class GuestService {
-  static Future<List<GuestModel>> fetchGuests() async {
+  static Future<BillingResponseModel> fetchGuests() async {
     try {
       final response = await http.get(
         Uri.parse(
@@ -43,6 +45,7 @@ class GuestService {
       );
 
       print("STATUS CODE: ${response.statusCode}");
+
       print("BODY: ${response.body}");
 
       if (response.statusCode == 200) {
@@ -50,39 +53,27 @@ class GuestService {
 
         print("DECODED DATA: $data");
 
-        // SAFE NULL CHECKING
-
         final responseData = data['GuestBillingByReservationIdResponse'];
 
+        // NULL CHECK
+
         if (responseData == null) {
-          return [];
+          throw Exception("No billing data found");
         }
 
-        final billingGuestList = responseData['BillingGuestList'];
+        // RETURN FULL BILLING MODEL
 
-        final amount = responseData['TSDPayableChargePerGuest'];
-
-        if (billingGuestList == null) {
-          return [];
-        }
-
-        // ENSURE IT IS A LIST
-
-        if (billingGuestList is! List) {
-          return [];
-        }
-
-        return billingGuestList.map<GuestModel>((e) {
-          e['amount'] = amount.toString();
-          return GuestModel.fromJson(e);
-        }).toList();
+        return BillingResponseModel.fromJson(responseData);
       } else {
         throw Exception(
-          "Failed to load guests. Status Code: ${response.statusCode}",
+          "Failed to load guests. "
+          "Status Code: "
+          "${response.statusCode}",
         );
       }
     } catch (e) {
       print("SERVICE ERROR: $e");
+
       rethrow;
     }
   }
