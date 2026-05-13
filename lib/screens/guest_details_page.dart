@@ -60,7 +60,7 @@ class GuestDetailsPage extends StatelessWidget {
                           Expanded(
                             child: Text(
                               "Bill No : "
-                              "${billing?.billNo}",
+                              "${billing.billNo}",
 
                               style: const TextStyle(
                                 fontSize: 22,
@@ -76,7 +76,7 @@ class GuestDetailsPage extends StatelessWidget {
                       // RESERVATION ID
                       Text(
                         "Reservation ID : "
-                        "${billing?.reservationId}",
+                        "${billing.reservationId}",
 
                         style: const TextStyle(fontSize: 16),
                       ),
@@ -110,7 +110,7 @@ class GuestDetailsPage extends StatelessWidget {
 
                                   const SizedBox(height: 5),
 
-                                  Text(billing?.checkInDateTime ?? ""),
+                                  Text(billing.checkInDateTime ?? ""),
                                 ],
                               ),
                             ),
@@ -142,7 +142,7 @@ class GuestDetailsPage extends StatelessWidget {
 
                                   const SizedBox(height: 5),
 
-                                  Text(billing?.checkOutDateTime ?? ""),
+                                  Text(billing.checkOutDateTime ?? ""),
                                 ],
                               ),
                             ),
@@ -221,10 +221,10 @@ class GuestDetailsPage extends StatelessWidget {
                       ),
 
                       // GUEST LIST
-                      ...List.generate(billing?.billingGuestList?.length ?? 0, (
+                      ...List.generate(billing.billingGuestList?.length ?? 0, (
                         index,
                       ) {
-                        final guest = billing?.billingGuestList![index];
+                        final guest = billing.billingGuestList![index];
 
                         return Container(
                           padding: const EdgeInsets.symmetric(
@@ -244,14 +244,14 @@ class GuestDetailsPage extends StatelessWidget {
 
                               Expanded(
                                 flex: 3,
-                                child: Text(guest?.guestName ?? ""),
+                                child: Text(guest.guestName ?? ""),
                               ),
 
                               Expanded(
                                 flex: 2,
 
                                 child: Text(
-                                  "₹ ${billing?.tsdPayableChargePerGuest}",
+                                  "₹ ${billing.tsdPayableChargePerGuest}",
                                 ),
                               ),
 
@@ -259,7 +259,7 @@ class GuestDetailsPage extends StatelessWidget {
                                 flex: 2,
 
                                 child: Text(
-                                  "₹ ${billing?.tsdPayableChargePerGuest}",
+                                  "₹ ${billing.tsdPayableChargePerGuest}",
                                 ),
                               ),
                             ],
@@ -274,7 +274,7 @@ class GuestDetailsPage extends StatelessWidget {
                         alignment: Alignment.centerRight,
 
                         child: Text(
-                          "Total ₹${billing?.totalBillableGuestsPrice}",
+                          "Total ₹${billing.totalBillableGuestsPrice}",
 
                           style: const TextStyle(
                             fontSize: 26,
@@ -288,7 +288,7 @@ class GuestDetailsPage extends StatelessWidget {
                       // TOTAL GUESTS
                       Text(
                         "Total Guests : "
-                        "${billing?.totalBillableGuests}",
+                        "${billing.totalBillableGuests}",
 
                         style: const TextStyle(
                           fontSize: 18,
