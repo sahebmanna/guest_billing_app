@@ -7,7 +7,7 @@ import '../service/guest_service.dart';
 class GuestController extends GetxController {
   RxBool isLoading = true.obs;
 
-  Rxn<BillingResponseModel> billingData = Rxn<BillingResponseModel>();
+  Rxn<GuestBillingResponse> billingData = Rxn<GuestBillingResponse>();
 
   @override
   void onInit() {

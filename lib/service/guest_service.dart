@@ -36,7 +36,7 @@ import 'package:http/http.dart' as http;
 import '../model/guest_model.dart';
 
 class GuestService {
-  static Future<BillingResponseModel> fetchGuests() async {
+  static Future<GuestBillingResponse> fetchGuests() async {
     try {
       final response = await http.get(
         Uri.parse(
@@ -63,7 +63,7 @@ class GuestService {
 
         // RETURN FULL BILLING MODEL
 
-        return BillingResponseModel.fromJson(responseData);
+        return GuestBillingResponse.fromJson(responseData);
       } else {
         throw Exception(
           "Failed to load guests. "
