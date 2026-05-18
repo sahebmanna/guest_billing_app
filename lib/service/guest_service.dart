@@ -36,6 +36,48 @@ import 'package:http/http.dart' as http;
 import '../model/guest_model.dart';
 
 class GuestService {
+  /*// static Future<GuestBillingResponse> fetchGuests() async {
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse(
+  //         "https://api.atithiaadhaar.com/api/BillingService/GetGuestBillingByReservationId/INDG77591498",
+  //       ),
+  //     );
+
+  //     print("STATUS CODE: ${response.statusCode}");
+
+  //     print("BODY: ${response.body}");
+
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+
+  //       print("DECODED DATA: $data");
+
+  //       final responseData = data['GuestBillingByReservationIdResponse'];
+
+  //       // NULL CHECK
+
+  //       if (responseData == null) {
+  //         throw Exception("No billing data found");
+  //       }
+
+  //       // RETURN FULL BILLING MODEL
+
+  //       return GuestBillingResponse.fromJson(responseData);
+  //     } else {
+  //       throw Exception(
+  //         "Failed to load guests. "
+  //         "Status Code: "
+  //         "${response.statusCode}",
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("SERVICE ERROR: $e");
+
+  //     rethrow;
+  //   }
+  // }
+  */
   static Future<GuestBillingResponse> fetchGuests() async {
     try {
       final response = await http.get(
@@ -44,7 +86,10 @@ class GuestService {
         ),
       );
 
-      print("STATUS CODE: ${response.statusCode}");
+      print(
+        "STATUS CODE: "
+        "${response.statusCode}",
+      );
 
       print("BODY: ${response.body}");
 
@@ -53,17 +98,9 @@ class GuestService {
 
         print("DECODED DATA: $data");
 
-        final responseData = data['GuestBillingByReservationIdResponse'];
+        // CORRECT
 
-        // NULL CHECK
-
-        if (responseData == null) {
-          throw Exception("No billing data found");
-        }
-
-        // RETURN FULL BILLING MODEL
-
-        return GuestBillingResponse.fromJson(responseData);
+        return GuestBillingResponse.fromJson(data);
       } else {
         throw Exception(
           "Failed to load guests. "

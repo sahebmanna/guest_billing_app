@@ -5,9 +5,9 @@ import '../model/guest_model.dart';
 import '../service/guest_service.dart';
 
 class GuestController extends GetxController {
-  RxBool isLoading = true.obs;
+  bool isLoading = true;
 
-  Rxn<GuestBillingResponse> billingData = Rxn<GuestBillingResponse>();
+  GuestBillingResponse? billingData;
 
   @override
   void onInit() {
@@ -18,15 +18,18 @@ class GuestController extends GetxController {
 
   Future<void> fetchGuests() async {
     try {
-      isLoading.value = true;
+      isLoading = true;
+      update();
 
       final result = await GuestService.fetchGuests();
 
-      billingData.value = result;
+      billingData = result;
+      print(billingData?.guestBillingByReservationIdResponse?.billingGuestList);
     } catch (e) {
       print("CONTROLLER ERROR: $e");
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      update();
     }
   }
 }

@@ -10,170 +10,166 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userController = Get.find<UserController>();
+    return GetBuilder<UserController>(
+      init: Get.find<UserController>(),
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text("Dashboard"),
-      ),
+      builder: (userController) {
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: const Text("Dashboard"),
+          ),
 
-      // RIGHT DRAWER
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+          // RIGHT DRAWER
+          endDrawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
 
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Obx(
-                () => Text(
-                  "${userController.firstName.value} "
-                  "${userController.lastName.value}",
-                ),
-              ),
+              children: [
+                UserAccountsDrawerHeader(
+                  accountName: Text(
+                    "${userController.firstName} "
+                    "${userController.lastName}",
+                  ),
 
-              accountEmail: Obx(() => Text(userController.email.value)),
+                  accountEmail: Text(userController.email),
 
-              currentAccountPicture: Obx(
-                () => CircleAvatar(
-                  backgroundImage: userController.userImage.value != null
-                      ? FileImage(userController.userImage.value!)
-                      : null,
+                  currentAccountPicture: CircleAvatar(
+                    backgroundImage: userController.userImage != null
+                        ? FileImage(userController.userImage!)
+                        : null,
 
-                  child: userController.userImage.value == null
-                      ? const Icon(Icons.person)
-                      : null,
-                ),
-              ),
-            ),
-
-            // PROFILE
-            ListTile(
-              leading: const Icon(Icons.person),
-
-              title: const Text("Profile"),
-
-              onTap: () {
-                Get.offNamed('/ProfilePage');
-              },
-            ),
-
-            // DASHBOARD
-            ListTile(
-              leading: const Icon(Icons.dashboard),
-
-              title: const Text("Dashboard"),
-
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-
-            // GUEST DETAILS
-            Obx(
-              () => ListTile(
-                leading: Icon(
-                  Icons.people,
-
-                  color: userController.isProfileComplete
-                      ? Colors.black
-                      : Colors.grey,
+                    child: userController.userImage == null
+                        ? const Icon(Icons.person)
+                        : null,
+                  ),
                 ),
 
-                title: Text(
-                  "Guest Details",
+                // PROFILE
+                ListTile(
+                  leading: const Icon(Icons.person),
 
-                  style: TextStyle(
+                  title: const Text("Profile"),
+
+                  onTap: () {
+                    Get.toNamed('/ProfilePage');
+                  },
+                ),
+
+                // DASHBOARD
+                ListTile(
+                  leading: const Icon(Icons.dashboard),
+
+                  title: const Text("Dashboard"),
+
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+
+                // GUEST DETAILS
+                ListTile(
+                  leading: Icon(
+                    Icons.people,
+
                     color: userController.isProfileComplete
                         ? Colors.black
                         : Colors.grey,
                   ),
+
+                  title: Text(
+                    "Guest Details",
+
+                    style: TextStyle(
+                      color: userController.isProfileComplete
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  ),
+
+                  onTap: () {
+                    if (!userController.isProfileComplete) {
+                      Get.snackbar("Incomplete", "Complete profile first");
+
+                      return;
+                    }
+
+                    Get.toNamed('/guestDetails');
+                  },
                 ),
-
-                onTap: () {
-                  if (!userController.isProfileComplete) {
-                    Get.snackbar("Incomplete", "Complete profile first");
-
-                    return;
-                  }
-
-                  Get.toNamed('/guestDetails');
-                },
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
 
-      body: Obx(
-        () => SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
 
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
 
-              // PROFILE IMAGE
-              CircleAvatar(
-                radius: 60,
+                // PROFILE IMAGE
+                CircleAvatar(
+                  radius: 60,
 
-                backgroundImage: userController.userImage.value != null
-                    ? FileImage(userController.userImage.value!)
-                    : null,
+                  backgroundImage: userController.userImage != null
+                      ? FileImage(userController.userImage!)
+                      : null,
 
-                child: userController.userImage.value == null
-                    ? const Icon(Icons.person, size: 60)
-                    : null,
-              ),
-
-              const SizedBox(height: 25),
-
-              // USER INFO CARD
-              Card(
-                elevation: 5,
-
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  child: userController.userImage == null
+                      ? const Icon(Icons.person, size: 60)
+                      : null,
                 ),
 
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
+                const SizedBox(height: 25),
 
-                  child: Column(
-                    children: [
-                      buildTile("First Name", userController.firstName.value),
+                // USER INFO CARD
+                Card(
+                  elevation: 5,
 
-                      buildTile("Last Name", userController.lastName.value),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
 
-                      buildTile("Email", userController.email.value),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
 
-                      buildTile("Gender", userController.gender.value),
+                    child: Column(
+                      children: [
+                        buildTile("First Name", userController.firstName),
 
-                      buildTile(
-                        "Phone",
-                        "${userController.countryCode.value} "
-                            "${userController.phone.value}",
-                      ),
+                        buildTile("Last Name", userController.lastName),
 
-                      buildTile(
-                        "DOB",
+                        buildTile("Email", userController.email),
 
-                        userController.dob.value.isEmpty
-                            ? ""
-                            : "${DateTime.parse(userController.dob.value).day}/"
-                                  "${DateTime.parse(userController.dob.value).month}/"
-                                  "${DateTime.parse(userController.dob.value).year}",
-                      ),
+                        buildTile("Gender", userController.gender),
 
-                      buildTile("Address", userController.address.value),
-                    ],
+                        buildTile(
+                          "Phone",
+                          "${userController.countryCode} "
+                              "${userController.phone}",
+                        ),
+
+                        buildTile(
+                          "DOB",
+
+                          userController.dob.isEmpty
+                              ? ""
+                              : "${DateTime.parse(userController.dob).day}/"
+                                    "${DateTime.parse(userController.dob).month}/"
+                                    "${DateTime.parse(userController.dob).year}",
+                        ),
+
+                        buildTile("Address", userController.address),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

@@ -13,7 +13,7 @@ import 'package:task1_login_page_app/controllers/guest_controller.dart';
 import 'package:get/get.dart';
 
 void main() {
-  Get.put(GuestController());
+  Get.put(GuestController(), permanent: true);
   Get.put(UserController());
 
   runApp(const MyApp());

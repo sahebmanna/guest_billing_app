@@ -14,8 +14,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  bool _isSubmitted = false;
-  String? countryError;
 
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
@@ -77,9 +75,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> loadUser() async {
     await userController.loadUserData();
 
-    phoneController.text = userController.phone.value;
+    phoneController.text = userController.phone;
 
-    addressController.text = userController.address.value;
+    addressController.text = userController.address;
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -129,373 +127,383 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   @override
+  void dispose() {
+    phoneController.dispose();
+
+    addressController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text("Profile"),
-      ),
+    return GetBuilder<UserController>(
+      init: Get.find<UserController>(),
 
-      // =========================
-      // RIGHT DRAWER
-      // =========================
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+      builder: (userController) {
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: const Text("Profile"),
+          ),
 
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Obx(
-                () => Text(
-                  "${userController.firstName.value} "
-                  "${userController.lastName.value}",
-                ),
-              ),
+          // =========================
+          // RIGHT DRAWER
+          // =========================
+          endDrawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
 
-              accountEmail: Obx(() => Text(userController.email.value)),
-
-              currentAccountPicture: Obx(
-                () => CircleAvatar(
-                  backgroundImage: userController.userImage.value != null
-                      ? FileImage(userController.userImage.value!)
-                      : null,
-
-                  child: userController.userImage.value == null
-                      ? const Icon(Icons.person)
-                      : null,
-                ),
-              ),
-            ),
-            // Profile
-            ListTile(
-              leading: const Icon(Icons.account_circle),
-
-              title: const Text("Profile"),
-
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-
-            // DASHBOARD
-            Obx(
-              () => ListTile(
-                leading: Icon(
-                  Icons.dashboard,
-
-                  color: userController.isProfileComplete
-                      ? Colors.black
-                      : Colors.grey,
-                ),
-
-                title: Text(
-                  "Dashboard",
-
-                  style: TextStyle(
-                    color: userController.isProfileComplete
-                        ? Colors.black
-                        : Colors.grey,
-                  ),
-                ),
-
-                onTap: () {
-                  if (!userController.isProfileComplete) {
-                    Get.snackbar("Incomplete", "Complete profile first");
-
-                    return;
-                  }
-
-                  Get.toNamed('/Dashboard');
-                },
-              ),
-            ),
-            // GUEST DETAILS
-            Obx(
-              () => ListTile(
-                leading: Icon(
-                  Icons.people,
-
-                  color: userController.isProfileComplete
-                      ? Colors.black
-                      : Colors.grey,
-                ),
-
-                title: Text(
-                  "Guest Details",
-
-                  style: TextStyle(
-                    color: userController.isProfileComplete
-                        ? Colors.black
-                        : Colors.grey,
-                  ),
-                ),
-
-                onTap: () {
-                  if (!userController.isProfileComplete) {
-                    Get.snackbar("Incomplete", "Complete profile first");
-
-                    return;
-                  }
-
-                  Navigator.pushNamed(context, '/guestDetails');
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      body: Obx(
-        () => SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            autovalidateMode: _isSubmitted
-                ? AutovalidateMode.always
-                : AutovalidateMode.disabled,
-            child: Column(
               children: [
-                Text('Complete Your Profile', style: TextStyle(fontSize: 20)),
-                SizedBox(height: 20),
+                UserAccountsDrawerHeader(
+                  accountName: Text(
+                    "${userController.firstName} "
+                    "${userController.lastName}",
+                  ),
 
-                // Profile Image + Edit
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 55,
-                      backgroundImage: userController.userImage.value != null
-                          ? FileImage(userController.userImage.value!)
-                          : null,
-                      child: userController.userImage.value == null
-                          ? const Icon(Icons.person, size: 50)
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: showImageSourceSheet,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  accountEmail: Text(userController.email),
 
-                const SizedBox(height: 20),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundImage: userController.userImage != null
+                        ? FileImage(userController.userImage!)
+                        : null,
 
-                // Name (read only)
-                buildLabel("First Name"),
-
-                TextField(
-                  readOnly: true,
-                  decoration: style(userController.firstName.value),
-                ),
-                const SizedBox(height: 4),
-                buildLabel("Last Name"),
-                TextField(
-                  readOnly: true,
-                  decoration: style(userController.lastName.value),
-                ),
-
-                const SizedBox(height: 4),
-                //Gender dropdown
-                buildLabel("Gender"),
-
-                DropdownButtonFormField<String>(
-                  initialValue: userController.gender.value == ""
-                      ? null
-                      : userController.gender.value,
-                  hint: const Text("Select Gender"),
-                  items: ["Male", "Female", "Other"]
-                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                      .toList(),
-                  onChanged: (val) {
-                    userController.gender.value = val!;
-                  },
-                  decoration: style(""),
-                  validator: (value) {
-                    if (value == null) {
-                      return "Please select gender";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 4),
-
-                //Email (read only)
-                buildLabel("Email ID"),
-                //SizedBox(height: 5),
-                TextField(
-                  readOnly: true,
-                  decoration: style(userController.email.value),
-                ),
-
-                const SizedBox(height: 4),
-
-                // Phone with country code
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildLabel("Phone Number"),
-
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: DropdownButton<String>(
-                            value: userController.countryCode.value,
-                            underline: const SizedBox(),
-                            items: ["+91", "+1", "+44"]
-                                .map(
-                                  (code) => DropdownMenuItem(
-                                    value: code,
-                                    child: Text(code),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (val) {
-                              userController.countryCode.value = val!;
-                              setState(() {
-                                countryError = null;
-                              });
-                            },
-                          ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: TextFormField(
-                            controller: phoneController,
-                            keyboardType: TextInputType.phone,
-                            decoration: style("Phone number"),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Phone number is required";
-                              }
-                              if (value.length != 10) {
-                                return "Must be 10 digits";
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    if (countryError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Text(
-                          countryError!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                buildLabel("Date Of Birth"),
-                Obx(
-                  () => TextField(
-                    readOnly: true,
-                    onTap: pickDOB,
-                    decoration: style("Date of Birth").copyWith(
-                      hintText: userController.dob.value.isEmpty
-                          ? "Select Date"
-                          : "${DateTime.parse(userController.dob.value).day}/${DateTime.parse(userController.dob.value).month}/${DateTime.parse(userController.dob.value).year}",
-                      suffixIcon: const Icon(Icons.calendar_today),
-                    ),
+                    child: userController.userImage == null
+                        ? const Icon(Icons.person)
+                        : null,
                   ),
                 ),
+                // Profile
+                ListTile(
+                  leading: const Icon(Icons.account_circle),
 
-                const SizedBox(height: 24),
+                  title: const Text("Profile"),
 
-                //  Address (3–4 lines)
-                buildLabel("Address"),
-                TextFormField(
-                  controller: addressController,
-                  maxLines: 4,
-                  decoration: style("Address"),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Address is required";
-                    }
-                    return null;
+                  onTap: () {
+                    Navigator.pop(context);
                   },
                 ),
-                const SizedBox(height: 35),
-                //  Save button
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        _isSubmitted = true;
-                        countryError = userController.countryCode.value.isEmpty
-                            ? "Select country code"
-                            : null;
-                      });
 
-                      if (!_formKey.currentState!.validate() ||
-                          countryError != null) {
-                        return;
-                      }
-                      // PROFILE IMAGE VALIDATION
+                // DASHBOARD
+                ListTile(
+                  leading: Icon(
+                    Icons.dashboard,
 
-                      if (userController.userImage.value == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Profile image is required"),
-                          ),
-                        );
+                    color: userController.isProfileComplete
+                        ? Colors.black
+                        : Colors.grey,
+                  ),
 
-                        return;
-                      }
+                  title: Text(
+                    "Dashboard",
 
-                      userController.phone.value = phoneController.text;
-
-                      userController.address.value = addressController.text;
-
-                      await userController.saveProfile();
-
-                      Get.snackbar("Success", "Profile Saved");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5), // cleaner look
-                      ),
-                    ),
-                    child: const Text(
-                      "Save Profile",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    style: TextStyle(
+                      color: userController.isProfileComplete
+                          ? Colors.black
+                          : Colors.grey,
                     ),
                   ),
+
+                  onTap: () {
+                    if (!userController.isProfileComplete) {
+                      Get.snackbar("Incomplete", "Complete profile first");
+
+                      return;
+                    }
+
+                    Get.toNamed('/Dashboard');
+                  },
+                ),
+
+                // GUEST DETAILS
+                ListTile(
+                  leading: Icon(
+                    Icons.people,
+
+                    color: userController.isProfileComplete
+                        ? Colors.black
+                        : Colors.grey,
+                  ),
+
+                  title: Text(
+                    "Guest Details",
+
+                    style: TextStyle(
+                      color: userController.isProfileComplete
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  ),
+
+                  onTap: () {
+                    if (!userController.isProfileComplete) {
+                      Get.snackbar("Incomplete", "Complete profile first");
+
+                      return;
+                    }
+
+                    Navigator.pushNamed(context, '/guestDetails');
+                  },
                 ),
               ],
             ),
           ),
-        ),
-      ),
+
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: userController.isSubmitted
+                  ? AutovalidateMode.always
+                  : AutovalidateMode.disabled,
+              child: Column(
+                children: [
+                  Text('Complete Your Profile', style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 20),
+
+                  // Profile Image + Edit
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundImage: userController.userImage != null
+                            ? FileImage(userController.userImage!)
+                            : null,
+                        child: userController.userImage == null
+                            ? const Icon(Icons.person, size: 50)
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: showImageSourceSheet,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Colors.blue,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Name (read only)
+                  buildLabel("First Name"),
+
+                  TextField(
+                    readOnly: true,
+                    decoration: style(userController.firstName),
+                  ),
+                  const SizedBox(height: 4),
+                  buildLabel("Last Name"),
+                  TextField(
+                    readOnly: true,
+                    decoration: style(userController.lastName),
+                  ),
+
+                  const SizedBox(height: 4),
+                  //Gender dropdown
+                  buildLabel("Gender"),
+
+                  DropdownButtonFormField<String>(
+                    initialValue: userController.gender == ""
+                        ? null
+                        : userController.gender,
+                    hint: const Text("Select Gender"),
+                    items: ["Male", "Female", "Other"]
+                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                        .toList(),
+                    onChanged: (val) {
+                      userController.gender = val!;
+                      userController.update();
+                    },
+                    decoration: style(""),
+                    validator: (value) {
+                      if (value == null) {
+                        return "Please select gender";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 4),
+
+                  //Email (read only)
+                  buildLabel("Email ID"),
+                  //SizedBox(height: 5),
+                  TextField(
+                    readOnly: true,
+                    decoration: style(userController.email),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // Phone with country code
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildLabel("Phone Number"),
+
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: DropdownButton<String>(
+                              value: userController.countryCode,
+                              underline: const SizedBox(),
+                              items: ["+91", "+1", "+44"]
+                                  .map(
+                                    (code) => DropdownMenuItem(
+                                      value: code,
+                                      child: Text(code),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (val) {
+                                userController.countryCode = val!;
+                                //userController.update();
+                                userController.countryError = null;
+
+                                userController.update();
+                              },
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: TextFormField(
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
+                              decoration: style("Phone number"),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Phone number is required";
+                                }
+                                if (value.length != 10) {
+                                  return "Must be 10 digits";
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      if (userController.countryError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Text(
+                            userController.countryError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  buildLabel("Date Of Birth"),
+                  TextField(
+                    readOnly: true,
+                    onTap: pickDOB,
+                    decoration: style("Date of Birth").copyWith(
+                      hintText: userController.dob.isEmpty
+                          ? "Select Date"
+                          : "${DateTime.parse(userController.dob).day}/${DateTime.parse(userController.dob).month}/${DateTime.parse(userController.dob).year}",
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  //  Address (3–4 lines)
+                  buildLabel("Address"),
+                  TextFormField(
+                    controller: addressController,
+                    maxLines: 4,
+                    decoration: style("Address"),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Address is required";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 35),
+                  //  Save button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        userController.isSubmitted = true;
+
+                        userController.countryError =
+                            userController.countryCode.isEmpty
+                            ? "Select country code"
+                            : null;
+
+                        userController.update();
+
+                        if (!_formKey.currentState!.validate() ||
+                            userController.countryError != null) {
+                          return;
+                        }
+                        // PROFILE IMAGE VALIDATION
+
+                        if (userController.userImage == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Profile image is required"),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        userController.phone = phoneController.text;
+
+                        userController.address = addressController.text;
+
+                        await userController.saveProfile();
+
+                        Get.snackbar("Success", "Profile Saved");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            5,
+                          ), // cleaner look
+                        ),
+                      ),
+                      child: const Text(
+                        "Save Profile",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -4,76 +4,83 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserController extends GetxController {
-  RxString firstName = "".obs;
-  RxString lastName = "".obs;
-  RxString email = "".obs;
+  String firstName = "";
+  String lastName = "";
+  String email = "";
 
-  RxString gender = "".obs;
-  RxString phone = "".obs;
-  RxString address = "".obs;
-  RxString countryCode = "+91".obs;
+  String gender = "";
+  String phone = "";
+  String address = "";
+  String countryCode = "+91";
 
-  RxString dob = "".obs;
+  String dob = "";
 
-  Rx<File?> userImage = Rx<File?>(null);
+  bool isSubmitted = false;
+  String? countryError;
+
+  File? userImage;
 
   bool get isProfileComplete {
-    return gender.value.isNotEmpty &&
-        phone.value.isNotEmpty &&
-        address.value.isNotEmpty &&
-        dob.value.isNotEmpty &&
-        userImage.value != null;
+    return gender.isNotEmpty &&
+        phone.isNotEmpty &&
+        address.isNotEmpty &&
+        dob.isNotEmpty &&
+        userImage != null;
   }
 
   Future<void> loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    firstName.value = prefs.getString("userFirstname") ?? "";
+    firstName = prefs.getString("userFirstname") ?? "";
 
-    lastName.value = prefs.getString("userSecondname") ?? "";
+    lastName = prefs.getString("userSecondname") ?? "";
 
-    email.value = prefs.getString("email") ?? "";
+    email = prefs.getString("email") ?? "";
 
-    gender.value = prefs.getString("gender") ?? "";
+    gender = prefs.getString("gender") ?? "";
 
-    phone.value = prefs.getString("phone") ?? "";
+    phone = prefs.getString("phone") ?? "";
 
-    address.value = prefs.getString("address") ?? "";
+    address = prefs.getString("address") ?? "";
 
-    countryCode.value = prefs.getString("countryCode") ?? "+91";
+    countryCode = prefs.getString("countryCode") ?? "+91";
 
-    dob.value = prefs.getString("dob") ?? "";
+    dob = prefs.getString("dob") ?? "";
 
-    final imagePath = prefs.getString("imagePath_${email.value}");
+    final imagePath = prefs.getString("imagePath_${email}");
 
     if (imagePath != null && File(imagePath).existsSync()) {
-      userImage.value = File(imagePath);
+      userImage = File(imagePath);
     }
+    update();
   }
 
   Future<void> saveProfile() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString("gender", gender.value);
+    await prefs.setString("gender", gender);
 
-    await prefs.setString("phone", phone.value);
+    await prefs.setString("phone", phone);
 
-    await prefs.setString("address", address.value);
+    await prefs.setString("address", address);
 
-    await prefs.setString("countryCode", countryCode.value);
+    await prefs.setString("countryCode", countryCode);
 
-    await prefs.setString("dob", dob.value);
+    await prefs.setString("dob", dob);
 
-    if (userImage.value != null) {
-      await prefs.setString("imagePath_${email.value}", userImage.value!.path);
+    if (userImage != null) {
+      await prefs.setString("imagePath_${email}", userImage!.path);
     }
+    update();
   }
 
   Future<void> pickDOB(DateTime pickedDate) async {
-    dob.value = pickedDate.toIso8601String();
+    dob = pickedDate.toIso8601String();
+    update();
   }
 
   void setUserImage(File imageFile) {
-    userImage.value = imageFile;
+    userImage = imageFile;
+    update();
   }
 }

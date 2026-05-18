@@ -132,11 +132,11 @@ class GuestBillingByReservationIdResponse {
   final int? totalGuests;
   final String? chargeForTsdPaidMode;
   final bool? isPropertyGstApplicable;
-  final int? tsdPayableChargePerGuest;
+  final num? tsdPayableChargePerGuest;
   final bool? isTsdChargePaid;
-  final int? totalBillableGuestsPrice;
+  final num? totalBillableGuestsPrice;
   final PropertyDetailsForBilling? propertyDetailsForBilling;
-  final List<BillingGuestList>? billingGuestList;
+  final List<BillingGuestList> billingGuestList;
 
   GuestBillingByReservationIdResponse({
     this.billNo,
@@ -153,7 +153,7 @@ class GuestBillingByReservationIdResponse {
     this.isTsdChargePaid,
     this.totalBillableGuestsPrice,
     this.propertyDetailsForBilling,
-    this.billingGuestList,
+    this.billingGuestList = const [], //change here
   });
 
   factory GuestBillingByReservationIdResponse.fromJson(
@@ -175,10 +175,15 @@ class GuestBillingByReservationIdResponse {
     propertyDetailsForBilling: json["PropertyDetailsForBilling"] == null
         ? null
         : PropertyDetailsForBilling.fromJson(json["PropertyDetailsForBilling"]),
+    // billingGuestList: List<BillingGuestList>.from(
+    //   json["BillingGuestList"]!.map((x) => BillingGuestList.fromJson(x)),
+    // ),
     billingGuestList: json["BillingGuestList"] == null
         ? []
         : List<BillingGuestList>.from(
-            json["BillingGuestList"]!.map((x) => BillingGuestList.fromJson(x)),
+            (json["BillingGuestList"] as List).map(
+              (x) => BillingGuestList.fromJson(x),
+            ),
           ),
   );
 
@@ -197,9 +202,9 @@ class GuestBillingByReservationIdResponse {
     "IsTSDChargePaid": isTsdChargePaid,
     "TotalBillableGuestsPrice": totalBillableGuestsPrice,
     "PropertyDetailsForBilling": propertyDetailsForBilling?.toJson(),
-    "BillingGuestList": billingGuestList == null
-        ? []
-        : List<dynamic>.from(billingGuestList!.map((x) => x.toJson())),
+    "BillingGuestList": List<dynamic>.from(
+      billingGuestList.map((x) => x.toJson()),
+    ),
   };
 }
 
