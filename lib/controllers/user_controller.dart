@@ -20,6 +20,8 @@ class UserController extends GetxController {
 
   File? userImage;
 
+  String? imageError;
+
   bool get isProfileComplete {
     return gender.isNotEmpty &&
         phone.isNotEmpty &&

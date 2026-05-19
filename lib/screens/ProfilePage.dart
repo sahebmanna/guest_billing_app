@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
 
+import 'package:flutter/services.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -17,6 +19,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
+
+  final dobController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
 
@@ -78,6 +82,10 @@ class _ProfilePageState extends State<ProfilePage> {
     phoneController.text = userController.phone;
 
     addressController.text = userController.address;
+
+    if (userController.dob.isNotEmpty) {
+      dobController.text = formatDate(userController.dob);
+    }
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -86,13 +94,19 @@ class _ProfilePageState extends State<ProfilePage> {
     if (img != null) {
       userController.setUserImage(File(img.path));
     }
+
+    userController.imageError = null;
+
+    userController.update();
   }
 
   Future<void> pickDOB() async {
     final picked = await showDatePicker(
       context: context,
 
-      initialDate: DateTime(2000),
+      initialDate: userController.dob.isNotEmpty
+          ? DateTime.parse(userController.dob)
+          : DateTime(2000),
 
       firstDate: DateTime(1900),
 
@@ -101,6 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (picked != null) {
       await userController.pickDOB(picked);
+      dobController.text = formatDate(userController.dob);
     }
   }
 
@@ -126,11 +141,24 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  String formatDate(String dob) {
+    try {
+      final date = DateTime.parse(dob);
+
+      return "${date.day}-"
+          "${date.month}-"
+          "${date.year}";
+    } catch (e) {
+      return "";
+    }
+  }
+
   @override
   void dispose() {
     phoneController.dispose();
 
     addressController.dispose();
+    dobController.dispose();
 
     super.dispose();
   }
@@ -195,7 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   title: Text(
-                    "Dashboard",
+                    "API Photo Gallary",
 
                     style: TextStyle(
                       color: userController.isProfileComplete
@@ -266,11 +294,39 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       CircleAvatar(
                         radius: 55,
+
+                        backgroundColor: Colors.grey.shade200,
+
                         backgroundImage: userController.userImage != null
                             ? FileImage(userController.userImage!)
                             : null,
+
                         child: userController.userImage == null
-                            ? const Icon(Icons.person, size: 50)
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+
+                                children: const [
+                                  Icon(
+                                    Icons.person,
+                                    size: 45,
+                                    color: Colors.grey,
+                                  ),
+
+                                  SizedBox(height: 8),
+
+                                  Text(
+                                    "Upload\nProfile Image",
+
+                                    textAlign: TextAlign.center,
+
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              )
                             : null,
                       ),
                       Positioned(
@@ -294,6 +350,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 10),
+
+                  if (userController.imageError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+
+                      child: Text(
+                        userController.imageError!,
+
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
 
                   const SizedBox(height: 20),
 
@@ -359,7 +428,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             child: DropdownButton<String>(
                               value: userController.countryCode,
@@ -388,6 +457,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: TextFormField(
                               controller: phoneController,
                               keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+
+                                LengthLimitingTextInputFormatter(10),
+                              ],
                               decoration: style("Phone number"),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -418,7 +492,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 24),
                   buildLabel("Date Of Birth"),
-                  TextField(
+                  /* TextField(
                     readOnly: true,
                     onTap: pickDOB,
                     decoration: style("Date of Birth").copyWith(
@@ -428,12 +502,25 @@ class _ProfilePageState extends State<ProfilePage> {
                       suffixIcon: const Icon(Icons.calendar_today),
                     ),
                   ),
+                  */
+                  TextField(
+                    controller: dobController,
+
+                    readOnly: true,
+
+                    onTap: pickDOB,
+
+                    decoration: style(
+                      "Date of Birth",
+                    ).copyWith(suffixIcon: const Icon(Icons.calendar_today)),
+                  ),
 
                   const SizedBox(height: 24),
 
                   //  Address (3–4 lines)
                   buildLabel("Address"),
                   TextFormField(
+                    textCapitalization: TextCapitalization.words,
                     controller: addressController,
                     maxLines: 4,
                     decoration: style("Address"),
@@ -466,14 +553,24 @@ class _ProfilePageState extends State<ProfilePage> {
                         }
                         // PROFILE IMAGE VALIDATION
 
+                        /* // if (userController.userImage == null) {
+                        //   ScaffoldMessenger.of(context).showSnackBar(
+                        //     const SnackBar(
+                        //       content: Text("Profile image is required"),
+                        //     ),
+                        //   );
+
+                        //   return;
+                        // }
+                        */
                         if (userController.userImage == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Profile image is required"),
-                            ),
-                          );
+                          userController.imageError = "Upload profile image";
+
+                          userController.update();
 
                           return;
+                        } else {
+                          userController.imageError = null;
                         }
 
                         userController.phone = phoneController.text;

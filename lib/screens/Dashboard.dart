@@ -17,7 +17,7 @@ class DashboardPage extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            title: const Text("Dashboard"),
+            title: const Text("API Photo Gallary"),
           ),
 
           // RIGHT DRAWER
@@ -60,7 +60,7 @@ class DashboardPage extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.dashboard),
 
-                  title: const Text("Dashboard"),
+                  title: const Text("API Photo Gallary"),
 
                   onTap: () {
                     Navigator.pop(context);
@@ -155,8 +155,8 @@ class DashboardPage extends StatelessWidget {
 
                           userController.dob.isEmpty
                               ? ""
-                              : "${DateTime.parse(userController.dob).day}/"
-                                    "${DateTime.parse(userController.dob).month}/"
+                              : "${DateTime.parse(userController.dob).day}-"
+                                    "${DateTime.parse(userController.dob).month}-"
                                     "${DateTime.parse(userController.dob).year}",
                         ),
 
